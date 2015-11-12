@@ -200,23 +200,13 @@ module JSONAPI
               if resource
                 id = resource.id
                 type = relationship.type_for_source(source)
-                relationships_only = already_serialized?(type, id)
-                if include_linkage && !relationships_only
-                  add_included_object(id, object_hash(resource, ia))
-                elsif include_linked_children || relationships_only
-                  relationship_data(resource, ia)
-                end
+                add_included_object(id, object_hash(resource, ia))
               end
             elsif relationship.is_a?(JSONAPI::Relationship::ToMany)
               resources = source.public_send(name)
               resources.each do |resource|
                 id = resource.id
-                relationships_only = already_serialized?(type, id)
-                if include_linkage && !relationships_only
-                  add_included_object(id, object_hash(resource, ia))
-                elsif include_linked_children || relationships_only
-                  relationship_data(resource, ia)
-                end
+                add_included_object(id, object_hash(resource, ia))
               end
             end
           end
@@ -328,7 +318,7 @@ module JSONAPI
       @included_objects[type] = {} unless @included_objects.key?(type)
 
       if already_serialized?(type, id)
-        @included_objects[type][id][:object_hash].merge!(object_hash)
+        @included_objects[type][id][:object_hash].deep_merge!(object_hash)
         set_primary(type, id) if primary
       else
         @included_objects[type].store(id, primary: primary, object_hash: object_hash)
