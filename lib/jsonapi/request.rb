@@ -384,7 +384,8 @@ module JSONAPI
         }
       end
 
-      if !raw.is_a?(Hash) || raw.length != 2 || !(raw.key?('type') && raw.key?('id'))
+      if !(raw.is_a?(Hash) || raw.is_a?(ActionController::Parameters)) ||
+        raw.keys.length != 2 || !(raw.key?('type') && raw.key?('id'))
         fail JSONAPI::Exceptions::InvalidLinksObject.new
       end
 
@@ -478,7 +479,7 @@ module JSONAPI
     def parse_to_many_relationship(link_value, relationship, &add_result)
       if link_value.is_a?(Array) && link_value.length == 0
         linkage = []
-      elsif link_value.is_a?(Hash)
+      elsif (link_value.is_a?(Hash) || link_value.is_a?(ActionController::Parameters))
         linkage = link_value[:data]
       else
         fail JSONAPI::Exceptions::InvalidLinksObject.new
@@ -516,7 +517,7 @@ module JSONAPI
       params.each do |key, value|
         case key.to_s
         when 'relationships'
-          value.each_key do |links_key|
+          value.keys.each do |links_key|
             unless formatted_allowed_fields.include?(links_key.to_sym)
               params_not_allowed.push(links_key)
               unless JSONAPI.configuration.raise_if_parameters_not_allowed

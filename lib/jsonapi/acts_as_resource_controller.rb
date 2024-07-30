@@ -63,10 +63,6 @@ module JSONAPI
         render_results(operation_results)
       end
 
-      if response.body.size > 0
-        response.headers['Content-Type'] = JSONAPI::MEDIA_TYPE
-      end
-
     rescue => e
       handle_exceptions(e)
     end
@@ -151,7 +147,7 @@ module JSONAPI
 
     def render_results(operation_results)
       response_doc = create_response_document(operation_results)
-      render status: response_doc.status, json: response_doc.contents
+      render status: response_doc.status, json: response_doc.contents, content_type: JSONAPI::MEDIA_TYPE
     end
 
     def create_response_document(operation_results)
